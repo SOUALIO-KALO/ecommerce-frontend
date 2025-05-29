@@ -4,10 +4,12 @@
 import React, { useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import { Provider, useDispatch } from "react-redux";
-import { configureStore } from "@reduxjs/toolkit";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import "./index.css";
+import store from "./redux/store";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import HomePage from "./components/HomePage";
@@ -18,38 +20,9 @@ import CheckoutPage from "./components/CheckoutPage";
 import OrdersPage from "./components/OrdersPage";
 import AdminAddProductPage from "./components/AdminAddProductPage";
 
-// Configuration du store Redux pour gérer l'état global (authentification et panier)
-const store = configureStore({
-  reducer: {
-    auth: (state = { user: null, token: null }, action) => {
-      switch (action.type) {
-        case "SET_USER":
-          return {
-            ...state,
-            user: action.payload.user,
-            token: action.payload.token,
-          };
-        case "CLEAR_USER":
-          return { user: null, token: null };
-        default:
-          return state;
-      }
-    },
-    cart: (state = { items: [] }, action) => {
-      switch (action.type) {
-        case "SET_CART":
-          return { items: action.payload };
-        case "CLEAR_CART":
-          return { items: [] };
-        default:
-          return state;
-      }
-    },
-  },
-});
-
 // Configuration d'Axios pour les requêtes API avec gestion des tokens
-axios.defaults.baseURL = "https://ecommerce-backend-1-znfo.onrender.com/api";
+// axios.defaults.baseURL = "https://ecommerce-backend-1-znfo.onrender.com/api";
+axios.defaults.baseURL = "http://localhost:5000/api";
 axios.interceptors.request.use((config) => {
   const token = store.getState().auth.token;
   if (token) {
@@ -117,6 +90,7 @@ const App = () => (
             </Routes>
           </main>
           <Footer />
+          <ToastContainer position="top-right" autoClose={3000} />
         </div>
       </AppInitializer>
     </BrowserRouter>

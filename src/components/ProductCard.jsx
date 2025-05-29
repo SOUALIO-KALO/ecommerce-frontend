@@ -4,6 +4,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const ProductCard = ({ product, onDelete }) => {
   const dispatch = useDispatch();
@@ -17,9 +18,11 @@ const ProductCard = ({ product, onDelete }) => {
         quantity: 1,
       });
       dispatch({ type: "SET_CART", payload: response.data });
-      alert("Produit ajouté au panier !");
+      toast.success("Produit ajouté au panier !");
     } catch (error) {
-      alert(error.response?.data?.error || "Erreur lors de l'ajout au panier");
+      toast.error(
+        error.response?.data?.error || "Erreur lors de l'ajout au panier"
+      );
     }
   };
 

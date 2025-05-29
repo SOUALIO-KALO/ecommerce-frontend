@@ -11,6 +11,7 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
+import { toast } from "react-toastify";
 import axios from "axios";
 
 // Initialisation de Stripe avec la clé publique
@@ -24,6 +25,7 @@ const CheckoutForm = () => {
   const stripe = useStripe();
   const elements = useElements();
   const { items } = useSelector((state) => state.cart);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     address: "",
     city: "",
@@ -35,6 +37,7 @@ const CheckoutForm = () => {
     e.preventDefault();
     if (!stripe || !elements) return;
 
+    setLoading(true);
     try {
       const { paymentMethod } = await stripe.createPaymentMethod({
         type: "card",
@@ -45,11 +48,28 @@ const CheckoutForm = () => {
         paymentMethodId: paymentMethod.id,
       });
 
-      dispatch({ type: "CLEAR_CART" });
-      alert("Commande passée avec succès !");
-      navigate("/orders");
+      if (response.data.paymentIntent.status === "succeeded") {
+        dispatch({ type: "CLEAR_CART" });
+        toast.success("Commande passée avec succès !");
+        navigate("/orders");
+      } else {
+        // Gérer les actions supplémentaires requises
+        const { error: confirmError } = await stripe.confirmCardPayment(
+          response.data.paymentIntent.client_secret
+        );
+
+        if (confirmError) {
+          toast.error(confirmError.message);
+        } else {
+          dispatch({ type: "CLEAR_CART" });
+          toast.success("Commande passée avec succès !");
+          navigate("/orders");
+        }
+      }
     } catch (error) {
-      alert(error.response?.data?.error || "Erreur lors du paiement");
+      toast.error(error.response?.data?.error || "Erreur lors du paiement");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -102,10 +122,10 @@ const CheckoutForm = () => {
       <p className="text-xl font-bold">Total: ${total.toFixed(2)}</p>
       <button
         type="submit"
-        className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
-        disabled={!stripe}
+        className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 disabled:bg-blue-300"
+        disabled={!stripe || loading}
       >
-        Payer
+        {loading ? "Traitement en cours..." : "Payer"}
       </button>
     </form>
   );
