@@ -21,8 +21,8 @@ import OrdersPage from "./components/OrdersPage";
 import AdminAddProductPage from "./components/AdminAddProductPage";
 
 // Configuration d'Axios pour les requêtes API avec gestion des tokens
-// axios.defaults.baseURL = "https://ecommerce-backend-1-znfo.onrender.com/api";
-axios.defaults.baseURL = "http://localhost:5000/api";
+axios.defaults.baseURL = "https://ecommerce-backend-1-znfo.onrender.com/api";
+// axios.defaults.baseURL = "http://localhost:5000/api";
 axios.interceptors.request.use((config) => {
   const token = store.getState().auth.token;
   if (token) {
